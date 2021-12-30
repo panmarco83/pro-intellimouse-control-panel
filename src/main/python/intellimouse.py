@@ -69,7 +69,14 @@ class IntelliMouse():
 			raise TypeError("please make sure to pass a integer for the property argument...")
 		report = self.__pad_right([self.__WRITE_REPORT_ID, property], self.__WRITE_REPORT_LENGTH)
 		self.__device.send_feature_report(report)
-		result = self.__device.get_input_report(self.__READ_REPORT_ID, self.__READ_REPORT_LENGTH)
+
+		# I really don't know what OS uses .get_input_report() instead of .get_feature_report().
+		# Here on ubuntu 20.04.2, it's "_feature_" instead of "_input_"
+		if sys.platform.startswith("win32") or sys.platform.startswith("darwin"):
+			result = self.__device.get_input_report(self.__READ_REPORT_ID, self.__READ_REPORT_LENGTH)
+		elif sys.platform.startswith("linux"):
+			result = self.__device.get_feature_report(self.__READ_REPORT_ID, self.__READ_REPORT_LENGTH)
+
 		return result[4 : 4 + result[3]]
 
 	def __pad_right(self, data, until):
